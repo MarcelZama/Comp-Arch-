@@ -1,0 +1,136 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 09/02/2022 16:21:12
+
+00001000                             1     ORG    $1000
+00001000                             2     
+00001000  =00000000                  3  EXIT          EQU 0      USED TO EXIT ASSEMBLY PROGRAM
+00001000  =00000000                  4  MIN_TREES     EQU 0      MIN NUMBER OF TREES
+00001000  =00000009                  5  MAX_TREES     EQU 9      MAX NUMBER OF TREES
+00001000  =00000000                  6  MIN_WINDMILLS EQU 0      MIN WEAPONS
+00001000  =00000005                  7  MAX_WINDMILLS EQU 5      MAX WEAPONS
+00001000  =00000064                  8  WIN_POINT     EQU 100    POINTS ACCUMILATED ON WIN
+00001000  =00000000                  9  LOSE_POINT    EQU 0      POINTS DEDUCTED ON A LOSS
+00001000  =00000064                 10  MINE_LOC      EQU 100    USED BELOW FOR SOME SIMPLE COLLISION DETECTION USING CMP
+00001000                            11  
+00001000                            12  
+00001000                            13  *START OF GAME
+00001000                            14  START:    
+00001000  11FC 0032 4000            15      MOVE.B #50,$4000  # 50 is the initial %nr of carbons in the atmoshere.
+00001006  1638 4000                 16      MOVE.B $4000,D3
+0000100A                            17      
+0000100A  B67C 0000                 18      CMP #0,D3 #if the number of carbons is equal to 0 the game ends if not it continues
+0000100E  6600 005A                 19      BNE END_GAME
+00001012  6000 0002                 20      BRA GAME_LOOP
+00001016                            21  GAME_LOOP:
+00001016  1638 4000                 22      MOVE.B $4000,D3 # move all the carbons numbers to 
+0000101A  B67C 0000                 23      CMP #0,D3 #if the number of carbons is equal to 0 the game ends if not it continues
+0000101E  6600 004A                 24      BNE END_GAME
+00001022  6100 000C                 25      BSR INPUT
+00001026  6100 001C                 26      BSR UPDATE
+0000102A  6100 0034                 27      BSR DRAW
+0000102E  60E6                      28      BRA GAME_LOOP
+00001030                            29  INPUT:
+Line 30 ERROR: Invalid opcode
+00001030                            30      Mess
+00001030  103C 0004                 31      MOVE.B #4,D0
+00001034  4E4F                      32      TRAP #15
+00001036  11C1 2000                 33      MOVE.B D1,$2000
+0000103A                            34      
+Line 35 ERROR: Undefined symbol
+0000103A  6100 ACDA                 35      BSR     POTIONS         BRANCH TO POTION INPUT SUBROUTINE
+Line 36 ERROR: Undefined symbol
+0000103E  6100 ACD6                 36      BSR     WEAPONS         BRANCH TO WEAPONSS INPUT SUBROUTINE
+00001042  4E75                      37      RTS
+00001044                            38  UPDATE:
+00001044  1838 2010                 39      MOVE.B $2010,D4
+00001048  0444 000A                 40      SUB #10,D4
+0000104C  11C4 2010                 41      MOVE.B D4,$2010
+00001050                            42      
+00001050  B87C 0000                 43      CMP #0,D4
+00001054  6700 000C                 44      BEQ CHANGE_GSM
+00001058                            45  DECORATE:
+00001058  163C 003C                 46      MOVE.B  #60, D3
+0000105C  6100 003E                 47      BSR     ENDL
+00001060                            48  DRAW:
+00001060  4E75                      49      RTS
+00001062                            50  CHANGE_GSM:
+00001062  11FC 0000 2000            51      MOVE.B #0,$2000
+00001068  60F6                      52      BRA DRAW
+0000106A                            53  END_GAME:
+0000106A  43F9 00001161             54      LEA MESSAGE_WANNAREPEATE, A1 # DISPLAY WANT TO REPEATE?
+00001070  103C 000E                 55      MOVE.B #14,D0
+00001074  4E4F                      56      TRAP #15
+00001076                            57      
+00001076  43F9 0000118E             58      LEA MESSAGE_YES, A1 # DISPLAY 1 FOR YES
+0000107C  103C 000E                 59      MOVE.B #14,D0
+00001080  4E4F                      60      TRAP #15
+00001082                            61      
+00001082  43F9 0000119F             62      LEA MESSAGE_NO, A1 # DISPLAY 0 FOR NO
+00001088  103C 000E                 63      MOVE.B #14,D0
+0000108C  4E4F                      64      TRAP #15
+0000108E                            65      
+0000108E  103C 0004                 66      MOVE.B #4,D0 # INPUT A NR FROM THE KEYBOARD
+00001092  4E4F                      67      TRAP #15
+00001094                            68      
+00001094  B27C 0001                 69      CMP #1,D1 # IF YES STARTS AGAIN
+00001098  6600 FF66                 70      BNE START
+0000109C                            71      
+0000109C                            72  *ADD ONE MORE LINE
+0000109C                            73  ENDL:                 
+0000109C  48E7 8040                 74      MOVEM.L D0/A1,-(A7)
+000010A0  303C 000E                 75      MOVE    #14,D0
+Line 76 ERROR: Undefined symbol
+000010A4  43F9 004DBD16             76      LEA     CRLF,A1
+000010AA  4E4F                      77      TRAP    #15
+000010AC  4CDF 0201                 78      MOVEM.L (A7)+,D0/A1
+000010B0  4E75                      79      RTS
+000010B2  11C1 2000                 80      MOVE.B D1,$2000
+000010B6                            81  
+000010B6                            82  
+000010B6  FFFF FFFF                 83      SIMHALT             ; halt simulator
+000010BA                            84  
+000010BA= 53 54 49 4C 4C 20 ...     85  MESSAGE_EARTH:       DC.B 'STILL FIGHTING THE CLIMAT CHANGE',0
+000010DB= 54 48 45 20 54 45 ...     86  MESSAGETWO_EARTH:    DC.B 'THE TEMPERATURE RISEN TOO MUCH',0
+000010FA= 48 45 59 20 59 4F ...     87  MESSAGE              DC.B 'HEY YOU SAVED THE WORLD, YOU WON A BILLION EURO !!!!                                            ,joke.', 0
+00001161= 48 65 79 2C 61 6C ...     88  MESSAGE_WANNAREPEATE DC.B 'Hey,already lost? Want to try one more time?',0
+0000118E= 50 72 65 73 73 20 ...     89  MESSAGE_YES          DC.B 'Press 1 for YES.',0
+0000119F= 50 72 65 73 73 20 ...     90  MESSAGE_NO           DC.B 'Press 0 for NO.',0
+000011AF                            91  
+000011AF= 4E 55 4D 42 45 52 ...     92  TREES_MSG:         DC.B 'NUMBER OF TREES : ',0
+000011C2= 4E 55 4D 42 45 52 ...     93  WINDMILLS_MSG:         DC.B 'NUMBER OF TREES : ',0
+000011D5                            94  
+000011D5                            95      END    START        ; last line of source
+
+4 errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CHANGE_GSM          1062
+DECORATE            1058
+DRAW                1060
+ENDL                109C
+END_GAME            106A
+EXIT                0
+GAME_LOOP           1016
+INPUT               1030
+LOSE_POINT          0
+MAX_TREES           9
+MAX_WINDMILLS       5
+MESSAGE             10FA
+MESSAGETWO_EARTH    10DB
+MESSAGE_EARTH       10BA
+MESSAGE_NO          119F
+MESSAGE_WANNAREPEATE  1161
+MESSAGE_YES         118E
+MINE_LOC            64
+MIN_TREES           0
+MIN_WINDMILLS       0
+START               1000
+TREES_MSG           11AF
+UPDATE              1044
+WINDMILLS_MSG       11C2
+WIN_POINT           64
