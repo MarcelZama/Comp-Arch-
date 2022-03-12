@@ -1,0 +1,207 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/12/2022 1:46:51 PM
+
+00001000                             1     ORG    $1000
+00001000                             2     
+00001000  =00000000                  3  EXIT          EQU 0      USED TO EXIT ASSEMBLY PROGRAM
+00001000  =00000000                  4  MIN_TREES     EQU 0      MIN NUMBER OF TREES
+00001000  =00000009                  5  MAX_TREES     EQU 9      MAX NUMBER OF TREES
+00001000  =00000000                  6  MIN_WINDMILLS EQU 0      MIN WindMIlls
+00001000  =00000005                  7  MAX_WINDMILLS EQU 5      MAX WindMIlls
+00001000  =00000064                  8  WIN_POINT     EQU 100    POINTS ACCUMILATED ON WIN
+00001000  =00000000                  9  LOSE_POINT    EQU 0      POINTS DEDUCTED ON A LOSS
+00001000  =00000064                 10  MINE_LOC      EQU 100    USED BELOW FOR SOME SIMPLE COLLISION DETECTION USING CMP 10
+00001000                            11  
+00001000                            12  
+00001000                            13  *START OF GAME
+00001000                            14  START:    
+00001000  11FC 0032 4000            15      MOVE.B #50,$4000  # 50 is the initial %nr of carbons in the atmoshere.
+00001006  1638 4000                 16      MOVE.B $4000,D3
+0000100A                            17      
+0000100A  43F9 00001136             18      LEA WELCOME, A1 
+00001010  103C 000E                 19      MOVE.B #14,D0
+00001014  4E4F                      20      TRAP #15
+00001016                            21      
+00001016  B67C 0000                 22      CMP #0,D3 #if the number of carbons is equal to 0 the game ends if not it continues
+0000101A  6600 00F2                 23      BNE END_GAME
+0000101E  6000 0002                 24      BRA GAME_LOOP 
+00001022                            25  GAME_LOOP:
+00001022  1638 4000                 26      MOVE.B $4000,D3 # move all the carbons numbers to 
+00001026  B67C 0000                 27      CMP #0,D3 #if the number of carbons is equal to 0 the game ends if not it continues
+0000102A  6600 00E2                 28      BNE END_GAME
+0000102E  6100 0020                 29      BSR MENU
+00001032  6100 00BC                 30      BSR CLEAR_SCREEN
+00001036  6100 000C                 31      BSR INPUT
+0000103A  6100 007E                 32      BSR UPDATE
+0000103E  6100 00C4                 33      BSR DRAW
+00001042  60DE                      34      BRA GAME_LOOP
+00001044                            35  INPUT: 
+00001044  103C 0004                 36      MOVE.B #4,D0 
+00001048  4E4F                      37      TRAP #15
+0000104A  11C1 2000                 38      MOVE.B D1,$2000
+0000104E                            39  
+0000104E  4E75                      40      RTS
+00001050                            41  MENU:
+00001050  43F9 00001317             42      LEA SHOPMENU_LAYOUT, A1 # DISPLAY MENU
+00001056  103C 000E                 43      MOVE.B #14,D0
+0000105A  4E4F                      44      TRAP #15
+0000105C                            45      
+0000105C  43F9 0000131D             46       LEA BUY_OPTION_MSG, A1 # INPUT 1 TO BUY 
+00001062  103C 000E                 47      MOVE.B #14,D0
+00001066  4E4F                      48      TRAP #15
+00001068                            49      
+00001068  43F9 00001344             50       LEA SELL_OPTION_MSG, A1 # INPUT 0 FOR SELL
+0000106E  103C 000E                 51      MOVE.B #14,D0
+00001072  4E4F                      52      TRAP #15
+00001074                            53      
+00001074  103C 0004                 54      MOVE.B #4,D0 # INPUT A NR FROM THE KEYBOARD
+00001078  4E4F                      55      TRAP #15 
+0000107A                            56      
+0000107A  B87C 0001                 57      CMP #1,D4 #IF 1 GO TO BUY MENU
+0000107E  6700 000A                 58      BEQ BUY
+00001082                            59      
+00001082  B87C 0000                 60      CMP #0,D4 #IF 0 GO TO SELL MENU
+00001086  6700 0002                 61      BEQ SELL
+0000108A                            62  BUY:
+0000108A                            63  
+0000108A                            64  SELL:
+0000108A  43F9 00001302             65      LEA SELL_MENU, A1 
+00001090  103C 000E                 66      MOVE.B #14,D0
+00001094  4E4F                      67      TRAP #15
+00001096                            68      
+00001096  43F9 0000136D             69      LEA TREES_MSG, A1
+0000109C  103C 000E                 70      MOVE.B #14,D0
+000010A0  4E4F                      71      TRAP #15
+000010A2                            72      
+000010A2  43F9 00001380             73      LEA WINDMILLS_MSG, A1
+000010A8  103C 000E                 74      MOVE.B #14,D0 
+000010AC  4E4F                      75      TRAP #15
+000010AE                            76      
+000010AE  43F9 00001396             77      LEA SolarPanels_MSG, A1
+000010B4  103C 000E                 78      MOVE.B #14,D0
+000010B8  4E4F                      79      TRAP #15
+000010BA                            80      
+000010BA                            81  
+000010BA                            82  UPDATE:
+000010BA  1838 2010                 83      MOVE.B $2010,D4
+000010BE  0444 000A                 84      SUB #10,D4 
+000010C2  11C4 2010                 85      MOVE.B D4,$2010
+000010C6                            86      
+000010C6  B87C 0000                 87      CMP #0,D4
+000010CA  6700 003A                 88      BEQ CHANGE_GSM
+000010CE                            89  HUD:
+000010CE                            90  
+000010CE  6100 005C                 91      BSR     ENDL
+000010D2  6100 0028                 92      BSR     DECORATE
+000010D6  43F9 000013AF             93      LEA     HUD_MSG,A1
+000010DC  103C 000E                 94      MOVE.B  #14,D0
+000010E0  4E4F                      95      TRAP    #15
+000010E2  1213                      96      MOVE.B  (A3),D1     RETRIEVE THE VALUE A3 POINT TO AND MOVE TO D1
+000010E4  103C 0003                 97      MOVE.B  #3,D0       MOVE LITERAL 3 TO D0
+000010E8  4E4F                      98      TRAP    #15         INTREPRET VALUE IN D0, WHICH 3 WHICH DISPLAYS D1
+000010EA  6100 0010                 99      BSR     DECORATE
+000010EE  4E75                     100      RTS
+000010F0                           101  CLEAR_SCREEN: 
+000010F0  103C 000B                102      MOVE.B  #11,D0      CLEAR SCREEN
+000010F4  323C FF00                103      MOVE.W  #$FF00,D1
+000010F8  4E4F                     104      TRAP    #15 
+000010FA  4E75                     105      RTS
+000010FC                           106  DECORATE:
+000010FC  163C 003C                107      MOVE.B  #60, D3
+00001100  6100 002A                108      BSR     ENDL
+00001104                           109  DRAW:
+00001104  4E75                     110      RTS
+00001106                           111  CHANGE_GSM:
+00001106  11FC 0000 2000           112      MOVE.B #0,$2000
+0000110C  60F6                     113      BRA DRAW
+0000110E                           114  END_GAME:
+0000110E  43F9 000012B0            115      LEA MESSAGE_WANNAREPEATE, A1 # DISPLAY WANT TO REPEATE?
+00001114  103C 000E                116      MOVE.B #14,D0
+00001118  4E4F                     117      TRAP #15
+0000111A                           118      
+0000111A  103C 0004                119      MOVE.B #4,D0 # INPUT A NR FROM THE KEYBOARD
+0000111E  4E4F                     120      TRAP #15
+00001120                           121      
+00001120  B27C 0001                122      CMP #1,D1 # IF YES STARTS AGAIN
+00001124  6600 FEDA                123      BNE START
+00001128  6100 0002                124      BSR ENDL
+0000112C                           125      
+0000112C                           126  *ADD ONE MORE LINE
+0000112C                           127  ENDL:                 
+0000112C  103C 0009                128      MOVE.B #9,D0
+00001130  4E4F                     129      TRAP #15
+00001132                           130  
+00001132                           131  
+00001132  FFFF FFFF                132      SIMHALT             ; halt simulator
+00001136= 20 20 20 20 20 20 ...    133  WELCOME:             DC.B '                     Welcome to my Projetc C00260146', $0D,$0A
+0000116C= 54 68 69 73 20 67 ...    134                       DC.B 'This game is about,how can we humankinds save the planet we live on.', $0D,$0A
+000011B2= 54 68 65 20 70 6C ...    135                       DC.B 'The planet we ruined. The planet that suffers because of us.', $0D,$0A, $0D,$0A, 0
+000011F3= 45 6E 6A 6F 79 20 ...    136                       DC.B 'Enjoy the GamePlay!', $0D,$0A, 0
+00001209                           137    
+00001209                           138  
+00001209= 53 54 49 4C 4C 20 ...    139  MESSAGE_EARTH:       DC.B 'STILL FIGHTING THE CLIMAT CHANGE',0
+0000122A= 54 48 45 20 54 45 ...    140  MESSAGETWO_EARTH:    DC.B 'THE TEMPERATURE RISEN TOO MUCH',0
+00001249= 48 45 59 20 59 4F ...    141  MESSAGE              DC.B 'HEY YOU SAVED THE WORLD, YOU WON A BILLION EURO !!!!                                            ,joke.', 0
+000012B0= 48 65 79 2C 61 6C ...    142  MESSAGE_WANNAREPEATE DC.B 'Hey,already lost? Want to try one more time?', $0D,$0A
+000012DE= 50 72 65 73 73 20 ...    143                       DC.B 'Press 1 for YES.', $0D,$0A
+000012F0= 50 72 65 73 73 20 ...    144                       DC.B 'Press 0 for NO.', $0D,$0A, 0
+00001302                           145  
+00001302= 53 45 4C 4C 20 4D ...    146  SELL_MENU:            DC.B 'SELL MENU:',0
+0000130D= 42 55 59 20 4D 45 ...    147  BUY_MENU:             DC.B 'BUY MENU:',0
+00001317                           148  
+00001317= 4D 45 4E 55 3A 00        149  SHOPMENU_LAYOUT          DC.B 'MENU:',0
+0000131D= 50 72 65 73 73 20 ...    150  BUY_OPTION_MSG:            DC.B 'Press 1 if you want to sell something.',0
+00001344= 50 72 65 73 73 20 ...    151  Sell_OPTION_MSG:           DC.B 'Press 2 if you want to buy  something.', $0D,$0A, 0
+0000136D                           152  
+0000136D                           153  
+0000136D= 4E 55 4D 42 45 52 ...    154  TREES_MSG:         DC.B 'NUMBER OF TREES : ',0
+00001380= 4E 55 4D 42 45 52 ...    155  WINDMILLS_MSG:     DC.B 'NUMBER OF WindMills: ',0
+00001396= 4E 55 4D 42 45 52 ...    156  SolarPanels_MSG:    DC.B 'NUMBER OF Solar Panels: ',0
+000013AF= 53 43 4F 52 45 20 ...    157  HUD_MSG:        DC.B    'SCORE : ',0
+000013B8                           158  
+000013B8                           159      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BUY                 108A
+BUY_MENU            130D
+BUY_OPTION_MSG      131D
+CHANGE_GSM          1106
+CLEAR_SCREEN        10F0
+DECORATE            10FC
+DRAW                1104
+ENDL                112C
+END_GAME            110E
+EXIT                0
+GAME_LOOP           1022
+HUD                 10CE
+HUD_MSG             13AF
+INPUT               1044
+LOSE_POINT          0
+MAX_TREES           9
+MAX_WINDMILLS       5
+MENU                1050
+MESSAGE             1249
+MESSAGETWO_EARTH    122A
+MESSAGE_EARTH       1209
+MESSAGE_WANNAREPEATE  12B0
+MINE_LOC            64
+MIN_TREES           0
+MIN_WINDMILLS       0
+SELL                108A
+SELL_MENU           1302
+SELL_OPTION_MSG     1344
+SHOPMENU_LAYOUT     1317
+SOLARPANELS_MSG     1396
+START               1000
+TREES_MSG           136D
+UPDATE              10BA
+WELCOME             1136
+WINDMILLS_MSG       1380
+WIN_POINT           64
