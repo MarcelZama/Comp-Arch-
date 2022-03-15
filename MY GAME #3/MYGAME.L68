@@ -1,0 +1,392 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/15/2022 4:51:49 PM
+
+00001000                             1     ORG    $1000
+00001000                             2     
+00001000  =00000000                  3  EXIT          EQU 0      USED TO EXIT ASSEMBLY PROGRAM
+00001000  =00000000                  4  MIN_TREES     EQU 0      MIN NUMBER OF TREES
+00001000  =00000009                  5  MAX_TREES     EQU 9      MAX NUMBER OF TREES
+00001000  =00000000                  6  MIN_WINDMILLS EQU 0      MIN WindMIlls
+00001000  =00000005                  7  MAX_WINDMILLS EQU 5      MAX WindMIlls
+00001000  =00000064                  8  WIN_POINT     EQU 100    POINTS ACCUMILATED ON WIN
+00001000  =00000000                  9  LOSE_POINT    EQU 0      POINTS DEDUCTED ON A LOSS
+00001000  =00000064                 10  MINE_LOC      EQU 100    USED BELOW FOR SOME SIMPLE COLLISION DETECTION USING CMP 10
+00001000                            11  
+00001000                            12  
+00001000                            13  *START OF GAME
+00001000                            14  START:    
+00001000  11FC 000A 4100            15      MOVE.B #10,$4100 # 0 initial number of Trees
+00001006  11FC 000D 4200            16      MOVE.B #13,$4200 # 0 initial number of WindMills
+0000100C  11FC 000F 4300            17      MOVE.B #15,$4300 # 0 initial number of SolarPanels
+00001012  1A3C 0064                 18      MOVE.B #100,D5 #Money
+00001016                            19   
+00001016  11FC 0032 4000            20      MOVE.B #50,$4000  # 50 is the initial %nr of carbons in the atmoshere. score
+0000101C  1638 4000                 21      MOVE.B $4000,D3  # carbon
+00001020                            22      
+00001020                            23      
+00001020  43F9 00001272             24      LEA WELCOME, A1 
+00001026  103C 000E                 25      MOVE.B #14,D0
+0000102A  4E4F                      26      TRAP #15
+0000102C                            27      
+0000102C  223C 000000C8             28      move.l   #200,D1     ; delay in 1/100th of seconds
+00001032  7017                      29      moveq    #23,D0
+00001034  4E4F                      30      trap     #15
+00001036                            31      
+00001036  6100 0150                 32      BSR CLEAR_SCREEN    #CMPA.L D3,A6 if the number of carbons is equal to 0 the game ends if not it continues
+0000103A                            33  
+0000103A  6000 0002                 34      BRA GAME_LOOP 
+0000103E                            35  GAME_LOOP:
+0000103E  1638 4000                 36      MOVE.B $4000,D3 # move all the carbons numbers to 
+00001042  B63C 0000                 37      CMP.B #0,D3 #if the number of carbons is equal to 0 the game ends if not it continues
+00001046  6700 01DC                 38      BEQ END_GAME
+0000104A  6E00 0148                 39      BGT TOP_LINE
+0000104E  6E00 0040                 40      BGT MENU
+00001052  6E00 0024                 41      BGT INPUT
+00001056                            42      
+00001056  0C38 0001 2000            43      CMP.B #1,$2000
+0000105C  6700 012A                 44      BEQ CLEAR_SCREEN
+00001060  6700 00A8                 45      BEQ SELL
+00001064                            46      
+00001064  0C38 0002 2000            47      CMP.B #2,$2000
+0000106A  6700 011C                 48      BEQ CLEAR_SCREEN
+0000106E  6700 002E                 49      BEQ BUY
+00001072                            50      
+00001072  6100 0114                 51      BSR CLEAR_SCREEN
+00001076  60C6                      52      BRA GAME_LOOP
+00001078                            53  INPUT: 
+00001078  43F9 00001AAA             54      LEA SPACE_MSG,A1
+0000107E  103C 000E                 55      MOVE.B #14,D0
+00001082  4E4F                      56      TRAP #15
+00001084                            57      
+00001084  103C 0004                 58      MOVE.B #4,D0 
+00001088  4E4F                      59      TRAP #15
+0000108A  11C1 2000                 60      MOVE.B D1,$2000
+0000108E                            61  
+0000108E  4E75                      62      RTS
+00001090                            63  MENU:
+00001090  43F9 000019D4             64      LEA SHOPMENU_LAYOUT, A1 # DISPLAY MENU
+00001096  103C 000E                 65      MOVE.B #14,D0
+0000109A  4E4F                      66      TRAP #15
+0000109C                            67      
+0000109C  4E75                      68      RTS
+0000109E                            69  BUY:
+0000109E  43F9 0000195A             70      LEA BUY_MENU, A1 
+000010A4  103C 000E                 71      MOVE.B #14,D0
+000010A8  4E4F                      72      TRAP #15
+000010AA                            73      
+000010AA  103C 0004                 74      MOVE.B #4,D0 # INPUT A NR FROM THE KEYBOARD
+000010AE  4E4F                      75      TRAP #15
+000010B0                            76      
+000010B0  B87C 0001                 77      CMP #1,D4
+000010B4                            78      
+000010B4  4E75                      79      RTS
+000010B6                            80  BUYTRESS:
+000010B6  1638 4100                 81      MOVE.B $4100,D3
+000010BA  5243                      82      ADD #1,D3
+000010BC  11C3 4100                 83      MOVE.B D3,$4100
+000010C0                            84      
+000010C0  0445 0096                 85      SUB #150,D5
+000010C4                            86      
+000010C4  43F9 00001ACE             87      LEA SUCCESS_MSG, A1 
+000010CA  103C 000E                 88      MOVE.B #14,D0
+000010CE  4E4F                      89      TRAP #15
+000010D0                            90      
+000010D0  4E75                      91      RTS
+000010D2                            92  BUYWINDMILLS:
+000010D2  1638 4200                 93      MOVE.B $4200,D3
+000010D6  5243                      94      ADD #1,D3
+000010D8  11C3 4200                 95      MOVE.B D3,$4200
+000010DC                            96      
+000010DC  0445 015E                 97      SUB #350,D5
+000010E0                            98      
+000010E0  43F9 00001ACE             99      LEA SUCCESS_MSG, A1 
+000010E6  103C 000E                100      MOVE.B #14,D0
+000010EA  4E4F                     101      TRAP #15
+000010EC                           102      
+000010EC  4E75                     103      RTS
+000010EE                           104  BUYSOLLARPANELS:
+000010EE  1638 4300                105      MOVE.B $4300,D3
+000010F2  5243                     106      ADD #1,D3
+000010F4  11C3 4300                107      MOVE.B D3,$4300
+000010F8                           108      
+000010F8  0445 01F4                109      SUB #500,D5
+000010FC                           110      
+000010FC  43F9 00001ACE            111      LEA SUCCESS_MSG, A1 
+00001102  103C 000E                112      MOVE.B #14,D0
+00001106  4E4F                     113      TRAP #15
+00001108                           114      
+00001108  4E75                     115      RTS
+0000110A                           116  SELL:
+0000110A  43F9 000018DC            117      LEA SELL_MENU, A1 
+00001110  103C 000E                118      MOVE.B #14,D0
+00001114  4E4F                     119      TRAP #15
+00001116                           120  
+00001116  6000 FF60                121      BRA INPUT
+0000111A                           122      
+0000111A  B83C 0001                123      CMP.B #1,D4
+0000111E  6700 0014                124      BEQ SELLTREES
+00001122  B83C 0002                125      CMP.B #2,D4
+00001126  6700 0028                126      BEQ SELLWINDMILLS
+0000112A  B83C 0003                127      CMP.B #3,D4
+0000112E  6700 003C                128      BEQ SELLSOLLARPANELS
+00001132                           129  
+00001132  4E75                     130      RTS
+00001134                           131  SELLTREES:
+00001134  1638 4100                132      MOVE.B $4100,D3
+00001138  5343                     133      SUB #1,D3
+0000113A  11C3 4100                134      MOVE.B D3,$4100
+0000113E                           135      
+0000113E  0645 00FA                136      ADD #250,D5
+00001142                           137      
+00001142  43F9 00001ACE            138      LEA SUCCESS_MSG, A1 
+00001148  103C 000E                139      MOVE.B #14,D0
+0000114C  4E4F                     140      TRAP #15
+0000114E                           141      
+0000114E  4E75                     142      RTS
+00001150                           143  SELLWINDMILLS:
+00001150  1638 4200                144      MOVE.B $4200,D3
+00001154  5343                     145      SUB #1,D3
+00001156  11C3 4200                146      MOVE.B D3,$4200 
+0000115A                           147     
+0000115A  0645 0226                148      ADD #550,D5
+0000115E                           149      
+0000115E  43F9 00001ACE            150      LEA SUCCESS_MSG, A1 
+00001164  103C 000E                151      MOVE.B #14,D0
+00001168  4E4F                     152      TRAP #15
+0000116A                           153      
+0000116A  4E75                     154      RTS
+0000116C                           155  SELLSOLLARPANELS:
+0000116C  1638 4300                156      MOVE.B $4300,D3
+00001170  5343                     157      SUB #1,D3
+00001172  11C3 4300                158      MOVE.B D3,$4300  
+00001176                           159    
+00001176  0645 0226                160      ADD #550,D5
+0000117A                           161      
+0000117A  43F9 00001ACE            162      LEA SUCCESS_MSG, A1 
+00001180  103C 000E                163      MOVE.B #14,D0
+00001184  4E4F                     164      TRAP #15
+00001186                           165      
+00001186  4E75                     166      RTS
+00001188                           167  CLEAR_SCREEN: 
+00001188  103C 000B                168      MOVE.B  #11,D0      CLEAR SCREEN
+0000118C  323C FF00                169      MOVE.W  #$FF00,D1
+00001190  4E4F                     170      TRAP    #15 
+00001192  4E75                     171      RTS
+00001194                           172  TOP_LINE:
+00001194  43F9 00001A89            173      LEA MONEY_MSG,A1    # MONEY MSG
+0000119A  103C 000E                174      MOVE.B #14,D0
+0000119E  4E4F                     175      TRAP #15
+000011A0                           176      
+000011A0  2205                     177      MOVE.L D5,D1       # MONEY
+000011A2  103C 0003                178      MOVE.B #3,D0
+000011A6  4E4F                     179      TRAP #15
+000011A8                           180      
+000011A8  1A01                     181      MOVE.B D1,D5
+000011AA                           182      
+000011AA  43F9 00001A75            183      LEA SCORE_MSG,A1    # SCORE MSG
+000011B0  103C 000E                184      MOVE.B #14,D0
+000011B4  4E4F                     185      TRAP #15
+000011B6                           186      
+000011B6  2203                     187      MOVE.L D3,D1         # SCORE
+000011B8  103C 0003                188      MOVE.B #3,D0
+000011BC  4E4F                     189      TRAP #15
+000011BE                           190      
+000011BE  11C1 4000                191      MOVE.B D1,$4000
+000011C2                           192      
+000011C2                           193      
+000011C2  1E38 4100                194      MOVE.B $4100,D7
+000011C6                           195    
+000011C6  43F9 00001A2C            196      LEA TREES_MSG,A1    # TREE MSG
+000011CC  103C 000E                197      MOVE.B #14,D0
+000011D0  4E4F                     198      TRAP #15
+000011D2                           199      
+000011D2  2207                     200      MOVE.L D7,D1         # TREE 
+000011D4  103C 0003                201      MOVE.B #3,D0
+000011D8  4E4F                     202      TRAP #15
+000011DA                           203      
+000011DA  11C1 4100                204      MOVE.B D1,$4100
+000011DE                           205      
+000011DE  1E38 4200                206      MOVE.B $4200,D7
+000011E2                           207      
+000011E2  43F9 00001A43            208      LEA WINDMILLS_MSG,A1    # WINDMILLS MSG
+000011E8  103C 000E                209      MOVE.B #14,D0
+000011EC  4E4F                     210      TRAP #15
+000011EE                           211      
+000011EE  2207                     212      MOVE.L D7,D1         # WINDMILLS 
+000011F0  103C 0003                213      MOVE.B #3,D0
+000011F4  4E4F                     214      TRAP #15
+000011F6                           215      
+000011F6  11C1 4200                216      MOVE.B D1,$4200
+000011FA                           217      
+000011FA  1E38 4300                218      MOVE.B $4300,D7
+000011FE                           219      
+000011FE  43F9 00001A5D            220      LEA SolarPanels_MSG,A1    # SolarPanels MSG
+00001204  103C 000E                221      MOVE.B #14,D0
+00001208  4E4F                     222      TRAP #15
+0000120A                           223      
+0000120A  2207                     224      MOVE.L D7,D1         # SolarPanels 
+0000120C  103C 0003                225      MOVE.B #3,D0
+00001210  4E4F                     226      TRAP #15
+00001212                           227      
+00001212  11C7 4300                228      MOVE.B D7,$4300
+00001216                           229      
+00001216  43F9 00001AAA            230      LEA SPACE_MSG,A1
+0000121C  103C 000E                231      MOVE.B #14,D0
+00001220  4E4F                     232      TRAP #15
+00001222                           233      
+00001222  4E75                     234      RTS
+00001224                           235      
+00001224                           236  END_GAME:
+00001224  43F9 0000188A            237      LEA MESSAGE_WANNAREPEATE, A1 # DISPLAY WANT TO REPEATE?
+0000122A  103C 000E                238      MOVE.B #14,D0
+0000122E  4E4F                     239      TRAP #15
+00001230                           240      
+00001230  103C 0004                241      MOVE.B #4,D0 # INPUT A NR FROM THE KEYBOARD
+00001234  4E4F                     242      TRAP #15
+00001236                           243      
+00001236  B27C 0001                244      CMP #1,D1 # IF YES STARTS AGAIN
+0000123A  6600 FDC4                245      BNE START
+0000123E  6100 0028                246      BSR ENDL
+00001242                           247      
+00001242                           248  *ADD ONE MORE LINE
+00001242                           249  EVENT1: 
+00001242  0443 000F                250      SUB #15,D3
+00001246  4E75                     251      RTS # DAY5 -15CARBON
+00001248                           252  EVENT2:
+00001248  5A43                     253      ADD #5,D3
+0000124A  4E75                     254      RTS # DAY6 +5CARBON
+0000124C                           255  EVENT3:
+0000124C  5B43                     256      SUB #5,D3
+0000124E  4E75                     257      RTS # DAY7 -5CARBON
+00001250                           258  EVENT4:
+00001250  0443 000A                259      SUB #10,D3
+00001254  4E75                     260      RTS # DAY8 -10CARBON
+00001256                           261  EVENT5:
+00001256  0645 01F4                262      ADD #500,D5
+0000125A  4E75                     263      RTS # DAY9 +500 MONEY
+0000125C                           264  EVENT6:
+0000125C  0645 01F4                265      ADD #500,D5
+00001260  0678 0019 00D3           266      ADD #25,$D3
+00001266  4E75                     267      RTS # DAY10 +500 MONEY AND +25 CARBON
+00001268                           268  ENDL:                 
+00001268  103C 0009                269      MOVE.B #9,D0
+0000126C  4E4F                     270      TRAP #15
+0000126E                           271          
+0000126E                           272  
+0000126E  FFFF FFFF                273      SIMHALT             ; halt simulator
+00001272= 20 20 20 20 20 20 ...    274  WELCOME:             DC.B '          __      __       .__                               ', $0D,$0A
+000012B1= 20 20 20 20 20 20 ...    275                       DC.B '         /  \    /  \ ____ |  |   ____  ____   _____   ____  ', $0D,$0A
+000012F0= 20 20 20 20 20 20 ...    276                       DC.B '         \   \/\/   // __ \|  | _/ ___\/  _ \ /     \_/ __ \ ', $0D,$0A    
+0000132F= 20 20 20 20 20 20 ...    277                       DC.B '          \        /\  ___/|  |_\  \__(  <_> )  Y Y  \  ___/ ', $0D,$0A
+0000136E= 20 20 20 20 20 20 ...    278                       DC.B '           \__/\  /  \___  >____/\___  >____/|__|_|  /\___  >', $0D,$0A
+000013AD= 20 20 20 20 20 20 ...    279                       DC.B '                \/       \/          \/            \/     \/ ', $0D,$0A
+000013EC= 0D 0A 0D 0A 0D 0A ...    280                       DC.B '', $0D,$0A, $0D,$0A, $0D,$0A, $0D,$0A, $0D,$0A, $0D,$0A
+000013F8= 20 20 20 20 20 20 ...    281                       DC.B '                        Welcome to my Project C00260146', $0D,$0A, $0D,$0A
+00001433= 20 20 20 20 54 68 ...    282                       DC.B '    This game is about,how can we humankinds save the planet we live on.', $0D,$0A
+0000147D= 20 20 20 20 54 68 ...    283                       DC.B '    The planet we ruined. The planet that suffers because of us....', $0D,$0A, $0D,$0A
+000014C4= 20 20 20 20 45 6E ...    284                       DC.B '    Enjoy the GamePlay!!!!', $0D,$0A,$0D,$0A
+000014E2= 20 20 20 5F 5F 5F ...    285                       DC.B '   _____              .___       ___.          ', $0D,$0A
+00001513= 20 20 2F 20 20 20 ...    286                       DC.B '  /     \ _____     __| _/____   \_ |__ ___.__.', $0D,$0A
+00001544= 20 2F 20 20 5C 20 ...    287                       DC.B ' /  \ /  \\__  \   / __ |/ __ \   | __ <   |  |', $0D,$0A
+00001575= 2F 20 20 20 20 59 ...    288                       DC.B '/    Y    \/ __ \_/ /_/ \  ___/   | \_\ \___  |', $0D,$0A
+000015A6= 5C 5F 5F 5F 5F 7C ...    289                       DC.B '\____|__  (____  /\____ |\___  >  |___  / ____|', $0D,$0A
+000015D7= 20 20 20 20 20 20 ...    290                       DC.B '        \/     \/      \/    \/       \/\/     ', $0D,$0A
+00001608= 20 20 20 20 5F 5F ...    291                       DC.B '    _____                             .__    __________                      ', $0D,$0A
+00001657= 20 20 20 2F 20 20 ...    292                       DC.B '   /     \ _____ _______   ____  ____ |  |   \____    /____    _____ _____   ', $0D,$0A
+000016A6= 20 20 2F 20 20 5C ...    293                       DC.B '  /  \ /  \\__  \\_  __ \_/ ___\/ __ \|  |     /     /\__  \  /     \\__  \  ', $0D,$0A
+000016F5= 20 2F 20 20 20 20 ...    294                       DC.B ' /    Y    \/ __ \|  | \/\  \__\  ___/|  |__  /     /_ / __ \|  Y Y  \/ __ \_', $0D,$0A
+00001744= 20 5C 5F 5F 5F 5F ...    295                       DC.B ' \____|__  (____  /__|    \___  >___  >____/ /_______ (____  /__|_|  (____  /', $0D,$0A
+00001793= 20 20 20 20 20 20 ...    296                       DC.B '         \/     \/            \/    \/               \/    \/      \/     \/ ', $0D,$0A,0
+000017E3                           297  
+000017E3= 53 54 49 4C 4C 20 ...    298  MESSAGE_EARTH:       DC.B 'STILL FIGHTING THE CLIMAT CHANGE',0
+00001804= 54 48 45 20 54 45 ...    299  MESSAGETWO_EARTH:    DC.B 'THE TEMPERATURE RISEN TOO MUCH',0
+00001823= 48 45 59 20 59 4F ...    300  MESSAGE              DC.B 'HEY YOU SAVED THE WORLD, YOU WON A BILLION EURO !!!!                                            ,joke.', 0
+0000188A= 48 65 79 2C 61 6C ...    301  MESSAGE_WANNAREPEATE DC.B 'Hey,already lost? Want to try one more time?', $0D,$0A
+000018B8= 50 72 65 73 73 20 ...    302                       DC.B 'Press 1 for YES.', $0D,$0A
+000018CA= 50 72 65 73 73 20 ...    303                       DC.B 'Press 0 for NO.', $0D,$0A, 0
+000018DC                           304  
+000018DC= 53 45 4C 4C 20 4D ...    305  SELL_MENU:            DC.B 'SELL MENU:', $0D,$0A
+000018E8= 50 72 65 73 73 20 ...    306                        DC.B 'Press 1 To Sell Trees (Price 5).', $0D,$0A
+0000190A= 50 72 65 73 73 20 ...    307                        DC.B 'Press 2 To Sell WindMills (Price 8).', $0D,$0A
+00001930= 50 72 65 73 73 20 ...    308                        DC.B 'Press 3 To Sell SolarPanels (Price 25).', $0D,$0A, 0
+0000195A                           309                        
+0000195A= 42 55 59 20 4D 45 ...    310  BUY_MENU:             DC.B 'BUY MENU:', $0D,$0A
+00001965= 50 72 65 73 73 20 ...    311                        DC.B 'Press 1 To Buy Trees (Price 3).', $0D,$0A
+00001986= 50 72 65 73 73 20 ...    312                        DC.B 'Press 2 To Buy WindMills (Price 5).', $0D,$0A
+000019AB= 50 72 65 73 73 20 ...    313                        DC.B 'Press 3 To Buy SolarPanels (Price 15).', $0D,$0A, 0
+000019D4                           314  
+000019D4= 4D 45 4E 55 3A 0D 0A     315  SHOPMENU_LAYOUT          DC.B 'MENU:', $0D,$0A
+000019DB= 50 72 65 73 73 20 ...    316                           DC.B 'Press 1 if you want to sell something.', $0D,$0A
+00001A03= 50 72 65 73 73 20 ...    317                           DC.B 'Press 2 if you want to buy  something.', $0D,$0A, 0
+00001A2C                           318  
+00001A2C                           319  
+00001A2C= 0D 0A 0D 0A              320  TREES_MSG:         DC.B  $0D,$0A,$0D,$0A   
+00001A30= 20 20 20 20 20 20 ...    321                     DC.B '          TREES : ', 0
+00001A43= 20 20 20 20 20 20 ...    322  WINDMILLS_MSG:     DC.B '             WindMills : ', 0
+00001A5D= 20 20 20 20 20 20 ...    323  SolarPanels_MSG:   DC.B '        Solar Panels : ', 0
+00001A75= 20 20 20 20 20 20 ...    324  SCORE_MSG:         DC.B '           SCORE : ', 0
+00001A89= 20 20 20 20 20 20 ...    325  MONEY_MSG:         DC.B '                        MONEY : ', 0
+00001AAA= 0D 0A 00                 326  SPACE_MSG:         DC.B '', $0D,$0A, 0
+00001AAD= 57 68 61 74 20 64 ...    327  YOURCHOISE_MSG:    DC.B 'What do you want to choose? --> ', 0
+00001ACE                           328  
+00001ACE= 2E 64 38 38 38 38 ...    329  SUCCESS_MSG:       DC.B '.d8888b 888  888 .d8888b .d8888b .d88b. .d8888b .d8888b  ',$0D,$0A
+00001B09= 38 38 4B 20 20 20 ...    330                     DC.B '88K     888  888d88P"   d88P"   d8P  Y8b88K     88K      ',$0D,$0A
+00001B44= 22 59 38 38 38 38 ...    331                     DC.B '"Y8888b.888  888888     888     88888888"Y8888b."Y8888b. ',$0D,$0A
+00001B7F= 20 20 20 20 20 58 ...    332                     DC.B '     X88Y88b 888Y88b.   Y88b.   Y8b.         X88     X88 ',$0D,$0A
+00001BBA= 20 38 38 38 38 38 ...    333                     DC.B ' 88888P  "Y88888 "Y8888P "Y8888P "Y8888  88888P  88888P  ',$0D,$0A, 0
+00001BF6                           334      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BUY                 109E
+BUYSOLLARPANELS     10EE
+BUYTRESS            10B6
+BUYWINDMILLS        10D2
+BUY_MENU            195A
+CLEAR_SCREEN        1188
+ENDL                1268
+END_GAME            1224
+EVENT1              1242
+EVENT2              1248
+EVENT3              124C
+EVENT4              1250
+EVENT5              1256
+EVENT6              125C
+EXIT                0
+GAME_LOOP           103E
+INPUT               1078
+LOSE_POINT          0
+MAX_TREES           9
+MAX_WINDMILLS       5
+MENU                1090
+MESSAGE             1823
+MESSAGETWO_EARTH    1804
+MESSAGE_EARTH       17E3
+MESSAGE_WANNAREPEATE  188A
+MINE_LOC            64
+MIN_TREES           0
+MIN_WINDMILLS       0
+MONEY_MSG           1A89
+SCORE_MSG           1A75
+SELL                110A
+SELLSOLLARPANELS    116C
+SELLTREES           1134
+SELLWINDMILLS       1150
+SELL_MENU           18DC
+SHOPMENU_LAYOUT     19D4
+SOLARPANELS_MSG     1A5D
+SPACE_MSG           1AAA
+START               1000
+SUCCESS_MSG         1ACE
+TOP_LINE            1194
+TREES_MSG           1A2C
+WELCOME             1272
+WINDMILLS_MSG       1A43
+WIN_POINT           64
+YOURCHOISE_MSG      1AAD
